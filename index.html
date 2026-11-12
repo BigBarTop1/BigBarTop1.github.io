@@ -264,7 +264,9 @@ function showFinish() {
 if (localStorage.getItem(key) === "yes") {  
   document.getElementById("number").textContent = "100";  
   document.getElementById("bar").style.width = "100%";  
-  showFinish();  
+  document.getElementById("screen").style.display = "none";
+  document.getElementById("finish").style.display = "flex";
+  document.getElementById("matrix").style.display = "none";  
 } else {  
   const phaseTimer = setInterval(() => {  
     phaseIndex = (phaseIndex + 1) % phases.length;  
