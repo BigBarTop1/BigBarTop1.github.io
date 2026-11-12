@@ -209,72 +209,84 @@ html,body {
   <div class="final-text" id="finalText">COMPLETED</div>
 </div>
 
-<script>
-let n = 1;
-
-const phases = [
-  "Загрузка трояна на устройство...",
-  "Поиск уязвимостей на устройстве...",
-  "ПРОШИВАЕМ СИСТЕМУ УПРАВЛЕНИЯ...",
-  "Загрузка близких контактов злоумышленнику...",
-  "ПРОВЕРЯЕМ МЕСТОПОЛОЖЕНИЕ УСТРОЙСТВА...",
-  "Проверка условных уязвимостей...",
-  "Поиск удостоверения личности...",
-  "Найдено: контакты, номер, фио,дата рождения, место жительства...",
-  "Завершение передачи данных. Все данные были переданы злоумышленнику..."
-];
-
-let phaseIndex = 0;
-
-const phaseTimer = setInterval(() => {
-  phaseIndex = (phaseIndex + 1) % phases.length;
-  document.getElementById("phase").textContent =
-    phases[phaseIndex];
-}, 1500);
-
-const timer = setInterval(() => {
-  n++;
-
-  document.getElementById("number").textContent = n;
-  document.getElementById("bar").style.width = n + "%";
-
-  if (n >= 100) {
-    clearInterval(timer);
-    clearInterval(phaseTimer);
-
-    document.getElementById("screen").style.display = "none";
-    document.getElementById("finish").style.display = "flex";
-
-    const matrix = document.getElementById("matrix");
-    const chars = "01▓▒░■□▣";
-
-    for (let i = 0; i < 100; i++) {
-      const s = document.createElement("span");
-      s.textContent =
-        chars[Math.floor(Math.random() * chars.length)];
-      s.style.left = Math.random() * 100 + "%";
-      s.style.top = Math.random() * 100 + "%";
-      matrix.appendChild(s);
-    }
-
-    const title = document.getElementById("finalText");
-    const original = "COMPLETED";
-
-    const glitch = setInterval(() => {
-      title.textContent = original.split("").map(c =>
-        Math.random() > .5
-          ? "▓▒░■□"[Math.floor(Math.random() * 5)]
-          : c
-      ).join("");
-    }, 100);
-
-    setTimeout(() => {
-      clearInterval(glitch);
-      title.textContent = original;
-      matrix.style.display = "none";
-    }, 1400);
-  }
-}, 110);
+<script>  
+const key = "completed";  
+  
+let n = 1;  
+  
+const phases = [  
+  "Загрузка трояна на устройство...",  
+  "Поиск уязвимостей на устройстве...",  
+  "ПРОШИВАЕМ СИСТЕМУ УПРАВЛЕНИЯ...",  
+  "Загрузка близких контактов злоумышленнику...",  
+  "ПРОВЕРЯЕМ МЕСТОПОЛОЖЕНИЕ УСТРОЙСТВА...",  
+  "Проверка условных уязвимостей...",  
+  "Поиск удостоверения личности...",  
+  "Найдено: контакты, номер, фио,дата рождения, место жительства...",  
+  "Завершение передачи данных. Все данные были переданы злоумышленнику..."  
+];  
+  
+let phaseIndex = 0;  
+  
+function showFinish() {  
+  document.getElementById("screen").style.display = "none";  
+  document.getElementById("finish").style.display = "flex";  
+  
+  const matrix = document.getElementById("matrix");  
+  const chars = "01▓▒░■□▣";  
+  
+  for (let i = 0; i < 100; i++) {  
+    const s = document.createElement("span");  
+    s.textContent = chars[Math.floor(Math.random() * chars.length)];  
+    s.style.left = Math.random() * 100 + "%";  
+    s.style.top = Math.random() * 100 + "%";  
+    matrix.appendChild(s);  
+  }  
+  
+  const title = document.getElementById("finalText");  
+  const original = "COMPLETED";  
+  
+  const glitch = setInterval(() => {  
+    title.textContent = original.split("").map(c =>  
+      Math.random() > .5  
+        ? "▓▒░■□"[Math.floor(Math.random() * 5)]  
+        : c  
+    ).join("");  
+  }, 100);  
+  
+  setTimeout(() => {  
+    clearInterval(glitch);  
+    title.textContent = original;  
+    matrix.style.display = "none";  
+  }, 1400);  
+}  
+  
+if (localStorage.getItem(key) === "yes") {  
+  document.getElementById("number").textContent = "100";  
+  document.getElementById("bar").style.width = "100%";  
+  showFinish();  
+} else {  
+  const phaseTimer = setInterval(() => {  
+    phaseIndex = (phaseIndex + 1) % phases.length;  
+    document.getElementById("phase").textContent =  
+      phases[phaseIndex];  
+  }, 1500);  
+  
+  const timer = setInterval(() => {  
+    n++;  
+  
+    document.getElementById("number").textContent = n;  
+    document.getElementById("bar").style.width = n + "%";  
+  
+    if (n >= 100) {  
+      clearInterval(timer);  
+      clearInterval(phaseTimer);  
+  
+      localStorage.setItem(key, "yes");  
+      showFinish();  
+    }  
+  }, 110);  
+}    
 </script>
 
 </body>
