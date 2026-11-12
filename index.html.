@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Симуляция</title>
+
+<style>
+* { box-sizing:border-box; }
+
+html,body {
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#020202;
+  font-family:Consolas,monospace;
+}
+
+.screen {
+  position:relative;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:25px;
+  text-align:center;
+  color:#ff2525;
+  background:
+    radial-gradient(ellipse at center,#250000,#090000 55%,#020202);
+}
+
+.screen:before {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    transparent 0px,
+    transparent 3px,
+    #ff000009 4px
+  );
+}
+
+.warning {
+  font-size:clamp(22px,6vw,32px);
+  font-weight:bold;
+  line-height:1.6;
+  letter-spacing:1px;
+  text-shadow:0 0 15px red;
+  margin-bottom:35px;
+}
+
+.track {
+  width:100%;
+  height:24px;
+  padding:3px;
+  border:1px solid #ff2525;
+  background:#130000;
+  box-shadow:0 0 15px #9c0000;
+}
+
+.bar {
+  width:1%;
+  height:100%;
+  background:#ff2020;
+  box-shadow:0 0 15px red;
+  transition:width .1s linear;
+}
+
+.percent {
+  font-size:clamp(75px,22vw,110px);
+  font-weight:bold;
+  margin:22px 0 5px;
+  background:linear-gradient(
+    90deg,#610000,#ff3535,#777,#ff2525,#610000
+  );
+  background-size:300% auto;
+  color:transparent;
+  background-clip:text;
+  -webkit-background-clip:text;
+  animation:shine 3s linear infinite;
+}
+
+.phase {
+  min-height:55px;
+  font-size:clamp(13px,3.7vw,17px);
+  color:#ff5555;
+  line-height:1.7;
+  text-shadow:0 0 9px #a00000;
+  margin-top:15px;
+}
+
+.bottom-warning {
+  position:absolute;
+  bottom:25px;
+  left:12px;
+  right:12px;
+  color:#ff3030;
+  font-size:clamp(11px,3vw,14px);
+  line-height:1.8;
+  text-shadow:0 0 10px red;
+  animation:blink 1s infinite;
+}
+
+.demo-label {
+  position:absolute;
+  top:12px;
+  font-size:9px;
+  color:#777;
+  letter-spacing:2px;
+}
+
+.finish {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle,#170000,#020202 75%);
+  color:#b9b9b9;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  z-index:5;
+}
+
+.final-number {
+  font-size:clamp(110px,27vw,175px);
+  font-weight:bold;
+  background:linear-gradient(
+    90deg,#555,#d0d0d0,#500000,#aaa,#555
+  );
+  background-size:300% auto;
+  color:transparent;
+  background-clip:text;
+  -webkit-background-clip:text;
+  animation:shine 2s linear infinite;
+  text-shadow:0 0 25px #59000055;
+}
+
+.final-text {
+  font-size:clamp(30px,9vw,48px);
+  letter-spacing:7px;
+  color:#9c2525;
+  text-shadow:0 0 15px #800000;
+  animation:blink 1.5s infinite;
+}
+
+@keyframes shine {
+  to { background-position:300% center; }
+}
+
+@keyframes blink {
+  50% { opacity:.45; }
+}
+
+.matrix {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.matrix span {
+  position:absolute;
+  color:#00aa45;
+  text-shadow:0 0 10px #00ff55;
+  font-size:20px;
+  animation:blink .12s infinite alternate;
+}
+</style>
+</head>
+
+<body>
+
+<div class="screen" id="screen">
+
+  <div class="demo-label">
+    ВЫПОЛНЯЕТСЯ КРАЖА ДАННЫХ
+  </div>
+
+  <div class="warning">
+    ВАШИ ДАННЫЕ ПЕРЕДАЮТСЯ ЗЛОУМЫШЛЕННИКАМ
+  </div>
+
+  <div class="track">
+    <div class="bar" id="bar"></div>
+  </div>
+
+  <div class="percent">
+    <span id="number">1</span>%
+  </div>
+
+  <div class="phase" id="phase">
+    Подготовка системы...
+  </div>
+
+  <div class="bottom-warning">
+    НЕ ЗАКРЫВАЙТЕ ВКЛАДКУ — БУДЕТ ТОЛЬКО ХУЖЕ 
+  </div>
+
+</div>
+
+<div class="finish" id="finish">
+  <div class="matrix" id="matrix"></div>
+  <div class="final-number">100%</div>
+  <div class="final-text" id="finalText">COMPLETED</div>
+</div>
+
+<script>
+let n = 1;
+
+const phases = [
+  "Загрузка трояна на устройство...",
+  "Поиск уязвимостей на устройстве...",
+  "ПРОШИВАЕМ СИСТЕМУ УПРАВЛЕНИЯ...",
+  "Загрузка близких контактов злоумышленнику...",
+  "ПРОВЕРЯЕМ МЕСТОПОЛОЖЕНИЕ УСТРОЙСТВА...",
+  "Проверка условных уязвимостей...",
+  "Поиск удостоверения личности...",
+  "Найдено: контакты, номер, фио,дата рождения, место жительства...",
+  "Завершение передачи данных. Все данные были переданы злоумышленнику..."
+];
+
+let phaseIndex = 0;
+
+const phaseTimer = setInterval(() => {
+  phaseIndex = (phaseIndex + 1) % phases.length;
+  document.getElementById("phase").textContent =
+    phases[phaseIndex];
+}, 1500);
+
+const timer = setInterval(() => {
+  n++;
+
+  document.getElementById("number").textContent = n;
+  document.getElementById("bar").style.width = n + "%";
+
+  if (n >= 100) {
+    clearInterval(timer);
+    clearInterval(phaseTimer);
+
+    document.getElementById("screen").style.display = "none";
+    document.getElementById("finish").style.display = "flex";
+
+    const matrix = document.getElementById("matrix");
+    const chars = "01▓▒░■□▣";
+
+    for (let i = 0; i < 100; i++) {
+      const s = document.createElement("span");
+      s.textContent =
+        chars[Math.floor(Math.random() * chars.length)];
+      s.style.left = Math.random() * 100 + "%";
+      s.style.top = Math.random() * 100 + "%";
+      matrix.appendChild(s);
+    }
+
+    const title = document.getElementById("finalText");
+    const original = "COMPLETED";
+
+    const glitch = setInterval(() => {
+      title.textContent = original.split("").map(c =>
+        Math.random() > .5
+          ? "▓▒░■□"[Math.floor(Math.random() * 5)]
+          : c
+      ).join("");
+    }, 100);
+
+    setTimeout(() => {
+      clearInterval(glitch);
+      title.textContent = original;
+      matrix.style.display = "none";
+    }, 1400);
+  }
+}, 110);
+</script>
+
+</body>
+</html>
